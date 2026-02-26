@@ -1,0 +1,129 @@
+📐 Figma Wireframe Blueprint: Doodle Wallpaper Studio
+
+이 문서는 피그마에서 와이어프레임을 그릴 때 참고할 화면별 레이아웃과 컴포넌트 명세서입니다.
+모든 기본 프레임은 iPhone 15 Pro (393 x 852) 기준으로 작업합니다.
+
+📱 Screen 1: Home (내 작업실)
+
+사용자의 기존 작업물을 보여주고, 새로운 창작을 유도하는 메인 화면입니다.
+
+[Top] Header (H: 80px)
+
+Text: "My Pocket Atelier" (개구체, 24pt, Bold)
+
+Icon: ⚙️ (우측 상단 설정 아이콘)
+
+[Center] My Doodles (Scrollable Area)
+
+Auto Layout: 수직(Vertical) 정렬, Gap 16px.
+
+Card Component: 기존에 만든 배경화면 썸네일 (W: 100%, H: 200px)
+
+스타일: 굵은 검은색 테두리 (3px), Hard Shadow (4px 4px 0px #1A1A1A), 둥근 모서리.
+
+내부 요소: 배경화면 미니 프리뷰 + "수정하기" 버튼.
+
+[Bottom] Floating Action Button (FAB)
+
+Button: 캔버스 하단 중앙에 고정 (W: 80%, H: 60px)
+
+Style: 쨍한 노란색(#FFDE59), Text: "+ 새 배경화면 만들기", 두꺼운 테두리와 그림자.
+
+📱 Screen 2: Type Selection (위젯 타입 선택)
+
+기획서의 6가지 메인 타입을 선택하는 화면입니다.
+
+[Top] Navigation Bar (H: 60px)
+
+Icon: <- (뒤로가기)
+
+Text: "어떤 위젯을 만들까요?" (가운데 정렬)
+
+[Center] Type Grid (Auto Layout: Wrap)
+
+2단 그리드 (2 Columns). 총 6개의 카드 배치.
+
+Card Component (W: 160px, H: 160px):
+
+Classic: 수직/수평 선반 아이콘 + "타임테이블"
+
+Circle: 둥근 시계 아이콘 + "원형 시계"
+
+Time Flow: 게이지 바 아이콘 + "타임 게이지"
+
+Life Progress: 자라나는 새싹 아이콘 + "라이프 프로그레스"
+
+Quote: 말풍선 아이콘 + "모토 & 낙서"
+
+Combo: 퍼즐 조각 아이콘 + "믹스앤매치"
+
+Interaction: Hover 또는 Tap 시 카드가 살짝 눌리는(Shadow 감소) 액션.
+
+📱 Screen 3: Editor - Main Workspace (편집기 캔버스)
+
+앱의 핵심 화면입니다. **Z-Index(레이어 순서)**에 유의해서 피그마 레이어를 구성하세요.
+
+[Layer 1: Background]
+
+Color: #F0F0F0 (작업 공간 느낌을 주는 옅은 회색)
+
+[Layer 2: Device Mockup - Center]
+
+Frame (W: 320px, H: 690px): 화면 중앙 정렬.
+
+선택한 기기(예: 아이폰)의 비율을 가진 화이트 박스.
+
+Guides (투명도 30% 빨간 점선):
+
+Top: 10:24 시계 및 노치/다이내믹 아일랜드 영역 표시.
+
+Bottom: 홈 인디케이터(스와이프 바), 손전등/카메라 버튼 영역 표시.
+
+[Layer 3: Top Toolbar - Absolute Position]
+
+화면 최상단 (W: 100%, H: 60px)
+
+Left: ↩️ (Undo), ↪️ (Redo)
+
+Right: 💾 (Save/Export Button - 검은 배경에 흰 글씨 포인트)
+
+📱 Screen 4: Editor - Bottom Sheet (하단 컨트롤러)
+
+화면 하단에서 올라오는 조작 패널입니다. 피그마에서 **Variants(변형)**로 만들면 편합니다.
+
+[Base Structure]
+
+Frame (W: 100%, H: 380px), 모서리 위쪽만 둥글게 (Top-Left: 30, Top-Right: 30).
+
+최상단 중앙에 얇은 Handle (드래그 바).
+
+[Tabs Navigation] (H: 50px)
+
+4개의 아이콘 탭: [ 🧊요소 | 🎨스타일 | ✨스티커 | ⚙️설정 ]
+
+[Content Area - Variants에 따라 변경]
+
+Variant 1 (요소/Element):
+
+선택한 'Type'에 맞는 블록들이 나열됨. (예: 타임테이블 모드면 [1시간 블록], [30분 블록] 칩들이 가로 스크롤로 나열됨).
+
+Variant 2 (스타일/Style):
+
+Color Palette: 동그란 색상 칩들 (선택 시 굵은 검은 테두리로 하이라이트).
+
+Font Selector: 폰트 이름이 해당 폰트체로 적힌 리스트.
+
+Variant 3 (스티커/Sticker):
+
+그리드 형태로 이모지/낙서 에셋 배치 (Drag & Drop 소스).
+
+💡 Figma 작업 시 꿀팁 (Parsons Tip)
+
+Neubrutalism Component Set 만들기:
+피그마에서 버튼이나 카드를 하나 만들 때, 기본적으로 Stroke: 3px (Inside, #1A1A1A), Drop shadow: X:4, Y:4, Blur:0, Spread:0, Color: #1A1A1A 세팅을 하나의 Effect Style로 지정해두세요. 작업 속도가 3배 빨라집니다.
+
+Interactive Components:
+버튼을 누를 때 섀도우 값이 X:1, Y:1 로 줄어드는 While pressing 프로토타입 연결을 컴포넌트 마스터에 걸어두면, 앱 전체가 쫀득쫀득해집니다.
+
+가이드라인 레이어 끄고 켜기:
+Editor 화면의 기기 가이드라인(시계, 하단 바)은 별도의 레이어로 묶어서 눈알 아이콘(Visibility)을 쉽게 끄고 켤 수 있게 구성하세요.

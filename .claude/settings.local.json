@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Bash(npm uninstall @react-native-community/datetimepicker 2>&1)"
+    ]
+  }
+}
