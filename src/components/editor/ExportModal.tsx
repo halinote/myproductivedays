@@ -73,7 +73,12 @@ export default function ExportModal({ visible, onClose, captureViewRef }: Export
           <Text style={styles.desc}>기기에 맞는 해상도를 선택해주세요</Text>
 
           {/* 해상도 목록 */}
-          <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled
+          >
             {DEVICE_PRESETS.map((device) => {
               const isSelected = selectedDevice.id === device.id;
               return (
@@ -99,23 +104,25 @@ export default function ExportModal({ visible, onClose, captureViewRef }: Export
             })}
           </ScrollView>
 
-          {/* 내보내기 버튼 */}
-          <Pressable
-            onPress={handleExport}
-            disabled={exporting}
-            style={[styles.exportBtn, exporting && styles.exportBtnDisabled]}
-          >
-            {exporting ? (
-              <ActivityIndicator color={COLORS.textPrimary} />
-            ) : (
-              <>
-                <Download size={20} color={COLORS.textPrimary} />
-                <Text style={styles.exportBtnText}>
-                  {selectedDevice.name}으로 저장
-                </Text>
-              </>
-            )}
-          </Pressable>
+          {/* 내보내기 버튼 — ScrollView 바깥, 항상 하단 고정 */}
+          <View style={styles.exportBtnWrapper}>
+            <Pressable
+              onPress={handleExport}
+              disabled={exporting}
+              style={[styles.exportBtn, exporting && styles.exportBtnDisabled]}
+            >
+              {exporting ? (
+                <ActivityIndicator color={COLORS.textPrimary} />
+              ) : (
+                <>
+                  <Download size={20} color={COLORS.textPrimary} />
+                  <Text style={styles.exportBtnText}>
+                    {selectedDevice.name}으로 저장
+                  </Text>
+                </>
+              )}
+            </Pressable>
+          </View>
         </View>
       </View>
     </Modal>
@@ -136,9 +143,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderRightWidth: 3,
     borderColor: COLORS.border,
-    paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40,
     maxHeight: '70%',
   },
   header: {
@@ -146,6 +151,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
+    paddingHorizontal: 20,
   },
   title: {
     fontFamily: 'Gaegu-Bold',
@@ -160,9 +166,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textSecondary,
     marginBottom: 16,
+    paddingHorizontal: 20,
   },
   list: {
-    marginBottom: 16,
+    flexGrow: 0,
+    paddingHorizontal: 20,
+  },
+  listContent: {
+    paddingBottom: 8,
   },
   // 기기 목록 아이템
   deviceRow: {
@@ -206,7 +217,12 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 1,
   },
-  // 내보내기 버튼
+  // 내보내기 버튼 래퍼 — 스크롤 영역 바깥 고정
+  exportBtnWrapper: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 40,
+  },
   exportBtn: {
     flexDirection: 'row',
     alignItems: 'center',

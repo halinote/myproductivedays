@@ -1,10 +1,9 @@
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -17,6 +16,7 @@ import TimeGaugeEditor from '@/components/editor/TimeGaugeEditor';
 import LifeProgressEditor from '@/components/editor/LifeProgressEditor';
 import MottoEditor from '@/components/editor/MottoEditor';
 import MixMatchEditor from '@/components/editor/MixMatchEditor';
+import ExportModal from '@/components/editor/ExportModal';
 
 // 배경색 팔레트
 const BG_COLORS = [
@@ -36,38 +36,13 @@ export default function EditorScreen() {
   const canRedo = useProjectStore((s) => s.canRedo());
   const updateCurrentProject = useProjectStore((s) => s.updateCurrentProject);
   const captureViewRef = useRef<View>(null);
-  const [exporting, setExporting] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [showBgPalette, setShowBgPalette] = useState(false);
 
   const handleSave = () => {
     saveProject();
     router.back();
   };
-
-  // 이미지 내보내기 — 프리뷰 영역 캡처 → 갤러리 저장
-  const handleExport = useCallback(async () => {
-    if (!captureViewRef.current) return;
-    try {
-      setExporting(true);
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('권한 필요', '사진 저장을 위해 갤러리 접근 권한이 필요합니다.');
-        return;
-      }
-      const uri = await captureRef(captureViewRef, {
-        format: 'png',
-        quality: 1,
-        result: 'tmpfile',
-      });
-      await MediaLibrary.saveToLibraryAsync(uri);
-      Alert.alert('저장 완료!', '배경화면이 갤러리에 저장되었습니다 ✨');
-    } catch (e) {
-      console.error('Export failed:', e);
-      Alert.alert('저장 실패', '이미지 저장 중 문제가 발생했습니다.');
-    } finally {
-      setExporting(false);
-    }
-  }, []);
 
   // 위젯 타입별 에디터 컴포넌트 선택
   const renderEditor = () => {
@@ -100,69 +75,77 @@ export default function EditorScreen() {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container} edges={['top']}>
-        {/* 상단 툴바 */}
-        <View style={styles.toolbar}>
-          <Pressable onPress={() => router.back()} style={styles.toolbarBtn}>
-            <ArrowLeft size={24} color={COLORS.textPrimary} />
-          </Pressable>
-          <Text style={styles.toolbarTitle}>
-            {currentProject?.title ?? '편집'}
-          </Text>
-          <View style={styles.toolbarRight}>
-            <Pressable onPress={undo} disabled={!canUndo} style={[styles.toolbarBtn, !canUndo && styles.toolbarBtnDisabled]}>
-              <Undo2 size={22} color={canUndo ? COLORS.textPrimary : COLORS.textMuted} />
+    <>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaView style={styles.container} edges={['top']}>
+          {/* 상단 툴바 */}
+          <View style={styles.toolbar}>
+            <Pressable onPress={() => router.back()} style={styles.toolbarBtn}>
+              <ArrowLeft size={24} color={COLORS.textPrimary} />
             </Pressable>
-            <Pressable onPress={redo} disabled={!canRedo} style={[styles.toolbarBtn, !canRedo && styles.toolbarBtnDisabled]}>
-              <Redo2 size={22} color={canRedo ? COLORS.textPrimary : COLORS.textMuted} />
-            </Pressable>
-            <Pressable
-              onPress={() => setShowBgPalette(!showBgPalette)}
-              style={styles.toolbarBtn}
-            >
-              <Palette size={22} color={COLORS.textPrimary} />
-            </Pressable>
-            <Pressable
-              onPress={handleExport}
-              disabled={exporting}
-              style={[styles.toolbarBtn, styles.exportBtn]}
-            >
-              <Download size={22} color={COLORS.textPrimary} />
-            </Pressable>
-            <Pressable
-              onPress={handleSave}
-              style={[styles.toolbarBtn, styles.saveBtn]}
-            >
-              <Save size={22} color="white" />
-            </Pressable>
-          </View>
-        </View>
-
-        {/* 배경색 팔레트 */}
-        {showBgPalette && (
-          <View style={styles.bgPaletteRow}>
-            {BG_COLORS.map((c) => (
+            <Text style={styles.toolbarTitle}>
+              {currentProject?.title ?? '편집'}
+            </Text>
+            <View style={styles.toolbarRight}>
+              <Pressable onPress={undo} disabled={!canUndo} style={[styles.toolbarBtn, !canUndo && styles.toolbarBtnDisabled]}>
+                <Undo2 size={22} color={canUndo ? COLORS.textPrimary : COLORS.textMuted} />
+              </Pressable>
+              <Pressable onPress={redo} disabled={!canRedo} style={[styles.toolbarBtn, !canRedo && styles.toolbarBtnDisabled]}>
+                <Redo2 size={22} color={canRedo ? COLORS.textPrimary : COLORS.textMuted} />
+              </Pressable>
               <Pressable
-                key={c}
-                onPress={() => {
-                  updateCurrentProject({ bgColor: c });
-                  setShowBgPalette(false);
-                }}
-                style={[
-                  styles.bgColorDot,
-                  { backgroundColor: c },
-                  currentProject?.bgColor === c && styles.bgColorDotActive,
-                ]}
-              />
-            ))}
+                onPress={() => setShowBgPalette(!showBgPalette)}
+                style={styles.toolbarBtn}
+              >
+                <Palette size={22} color={COLORS.textPrimary} />
+              </Pressable>
+              <Pressable
+                onPress={() => setShowExportModal(true)}
+                style={[styles.toolbarBtn, styles.exportBtn]}
+              >
+                <Download size={22} color={COLORS.textPrimary} />
+              </Pressable>
+              <Pressable
+                onPress={handleSave}
+                style={[styles.toolbarBtn, styles.saveBtn]}
+              >
+                <Save size={22} color="white" />
+              </Pressable>
+            </View>
           </View>
-        )}
 
-        {/* 위젯별 전용 에디터 */}
-        {renderEditor()}
-      </SafeAreaView>
-    </GestureHandlerRootView>
+          {/* 배경색 팔레트 */}
+          {showBgPalette && (
+            <View style={styles.bgPaletteRow}>
+              {BG_COLORS.map((c) => (
+                <Pressable
+                  key={c}
+                  onPress={() => {
+                    updateCurrentProject({ bgColor: c });
+                    setShowBgPalette(false);
+                  }}
+                  style={[
+                    styles.bgColorDot,
+                    { backgroundColor: c },
+                    currentProject?.bgColor === c && styles.bgColorDotActive,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* 위젯별 전용 에디터 */}
+          {renderEditor()}
+        </SafeAreaView>
+      </GestureHandlerRootView>
+
+      {/* 해상도 선택 내보내기 모달 — GestureHandler 바깥 */}
+      <ExportModal
+        visible={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        captureViewRef={captureViewRef}
+      />
+    </>
   );
 }
 

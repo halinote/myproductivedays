@@ -163,10 +163,10 @@ boxShadow: 4px 4px 0px #1A1A1A
 ### Phase 2 — 미구현 (핵심 기능 보완)
 
 #### 데이터 영속화 & 내보내기
-- [ ] AsyncStorage 연동 — 앱 종료 후에도 프로젝트 유지
-- [ ] 이미지 내보내기 — view-shot으로 캔버스 캡처 → media-library로 저장
-- [ ] 기기 해상도별 내보내기 (iPhone 15 Pro, Galaxy S24 등)
-- [ ] Undo/Redo 시스템 (현재 버튼 UI만 존재)
+- [x] AsyncStorage 연동 — 앱 종료 후에도 프로젝트 유지
+- [x] 이미지 내보내기 — view-shot으로 캔버스 캡처 → media-library로 저장
+- [x] 기기 해상도별 내보내기 (iPhone 15 Pro, Galaxy S24 등)
+- [x] Undo/Redo 시스템
 
 #### 타임테이블 보완
 - [ ] 블록 탭 → 인라인 편집 (이름, 시간, 색상 변경)
