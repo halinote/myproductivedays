@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { X, Download, Check } from 'lucide-react-native';
 import { captureRef } from 'react-native-view-shot';
@@ -26,29 +27,60 @@ export default function ExportModal({ visible, onClose, captureViewRef }: Export
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEVICE_PRESETS[0]);
   const [exporting, setExporting] = useState(false);
 
-  // 선택한 해상도로 이미지 캡처 → 갤러리 저장
+  // 선택한 해상도로 이미지 캡처 → 저장
   const handleExport = async () => {
-    if (!captureViewRef.current) return;
+    const device = selectedDevice;
+
     try {
       setExporting(true);
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('권한 필요', '사진 저장을 위해 갤러리 접근 권한이 필요합니다.');
+
+      // iOS 네이티브에서 Modal이 뷰 트리를 분리해 captureRef가 null이 될 수 있으므로
+      // 모달을 먼저 닫고 캡처 수행
+      onClose();
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      if (!captureViewRef.current) {
+        Alert.alert('오류', '캡처할 화면을 찾을 수 없습니다.');
         return;
       }
-      const uri = await captureRef(captureViewRef, {
-        format: 'png',
-        quality: 1,
-        result: 'tmpfile',
-        width: selectedDevice.width,
-        height: selectedDevice.height,
-      });
-      await MediaLibrary.saveToLibraryAsync(uri);
-      Alert.alert(
-        '저장 완료!',
-        `${selectedDevice.name} (${selectedDevice.width}×${selectedDevice.height}) 해상도로 갤러리에 저장되었습니다.`,
-      );
-      onClose();
+
+      if (Platform.OS === 'web') {
+        // 웹: data-uri로 캡처 → 브라우저 다운로드
+        const dataUri = await captureRef(captureViewRef, {
+          format: 'png',
+          quality: 1,
+          result: 'data-uri',
+          width: device.width,
+          height: device.height,
+        });
+        const link = document.createElement('a');
+        link.href = dataUri;
+        link.download = `wallpaper_${device.id}.png`;
+        link.click();
+        Alert.alert(
+          '다운로드 시작!',
+          `${device.name} (${device.width}×${device.height}) 해상도로 다운로드됩니다.`,
+        );
+      } else {
+        // 네이티브: 갤러리 저장
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('권한 필요', '사진 저장을 위해 갤러리 접근 권한이 필요합니다.');
+          return;
+        }
+        const uri = await captureRef(captureViewRef, {
+          format: 'png',
+          quality: 1,
+          result: 'tmpfile',
+          width: device.width,
+          height: device.height,
+        });
+        await MediaLibrary.saveToLibraryAsync(uri);
+        Alert.alert(
+          '저장 완료!',
+          `${device.name} (${device.width}×${device.height}) 해상도로 갤러리에 저장되었습니다.`,
+        );
+      }
     } catch (e) {
       console.error('Export failed:', e);
       Alert.alert('저장 실패', '이미지 저장 중 문제가 발생했습니다.');
